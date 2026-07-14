@@ -1,0 +1,204 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      routes:
+
+        # ── PUBLIC AUTH (no JWT filter) ──────────────────────────────────────
+        - id: auth-service-public
+          uri: http://${AUTH_SERVICE_HOST:localhost}:${AUTH_SERVICE_PORT:8081}
+          predicates:
+            - Path=/api/auth/login, /api/auth/register, /api/auth/refresh, /api/auth/forgot-password, /api/auth/reset-password
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: auth-public-cb
+                fallbackUri: forward:/fallback/auth
+
+        # ── PROTECTED AUTH ───────────────────────────────────────────────────
+        - id: auth-service-protected
+          uri: http://${AUTH_SERVICE_HOST:localhost}:${AUTH_SERVICE_PORT:8081}
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - JwtAuthenticationFilter
+            - name: CircuitBreaker
+              args:
+                name: auth-protected-cb
+                fallbackUri: forward:/fallback/auth
+
+        # ── SOCIETY SERVICE ──────────────────────────────────────────────────
+        - id: society-service
+          uri: http://${SOCIETY_SERVICE_HOST:localhost}:${SOCIETY_SERVICE_PORT:8082}
+          predicates:
+            - Path=/api/societies/**
+          filters:
+            - JwtAuthenticationFilter
+            - name: CircuitBreaker
+              args:
+                name: society-cb
+                fallbackUri: forward:/fallback/society
+
+        # ── COMPLAINT SERVICE ────────────────────────────────────────────────
+        - id: complaint-service
+          uri: http://${COMPLAINT_SERVICE_HOST:localhost}:${COMPLAINT_SERVICE_PORT:8084}
+          predicates:
+            - Path=/api/complaints/**
+          filters:
+            - JwtAuthenticationFilter
+            - name: CircuitBreaker
+              args:
+                name: complaint-cb
+                fallbackUri: forward:/fallback/complaint
+
+        # ── VENDOR SERVICE ───────────────────────────────────────────────────
+        - id: vendor-service
+          uri: http://${VENDOR_SERVICE_HOST:localhost}:${VENDOR_SERVICE_PORT:8085}
+          predicates:
+            - Path=/api/vendors/**
+          filters:
+            - JwtAuthenticationFilter
+            - name: CircuitBreaker
+              args:
+                name: vendor-cb
+                fallbackUri: forward:/fallback/vendor
+
+        # ── NOTIFICATION SERVICE ─────────────────────────────────────────────
+        - id: notification-service
+          uri: http://${NOTIFICATION_SERVICE_HOST:localhost}:${NOTIFICATION_SERVICE_PORT:8086}
+          predicates:
+            - Path=/api/notifications/**, /ws/**
+          filters:
+            - JwtAuthenticationFilter
+            - name: CircuitBreaker
+              args:
+                name: notification-cb
+                fallbackUri: forward:/fallback/notification
+
+        # ── ANALYTICS SERVICE ────────────────────────────────────────────────
+        - id: analytics-service
+          uri: http://${ANALYTICS_SERVICE_HOST:localhost}:${ANALYTICS_SERVICE_PORT:8087}
+          predicates:
+            - Path=/api/analytics/**
+          filters:
+            - JwtAuthenticationFilter
+            - name: CircuitBreaker
+              args:
+                name: analytics-cb
+                fallbackUri: forward:/fallback/analytics
+
+        # ── AUDIT SERVICE
+        - id: audit-service
+          uri: http://${AUDIT_SERVICE_HOST:localhost}:${AUDIT_SERVICE_PORT:8088}
+          predicates:
+            - Path=/api/audit/**
+          filters:
+            - JwtAuthenticationFilter
+            - name: CircuitBreaker
+              args:
+                name: audit-cb
+                fallbackUri: forward:/fallback/audit
+
+
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOriginPatterns: "*"
+            allowedMethods: "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+            allowedHeaders: "*"
+            allowCredentials: true
+
+  main:
+    allow-bean-definition-overriding: false
+
+# ── JWT secret shared with all services
+app:
+  jwt:
+    secret: ${JWT_SECRET:ThisIsAVeryLongAndSecureSecretKeyForSmartSocietyPlatformThatMustBeAtLeast512BitsLong!!}
+
+  gateway:
+    public-paths:
+      - /api/auth/login
+      - /api/auth/register
+      - /api/auth/refresh
+      - /api/auth/forgot-password
+      - /api/auth/reset-password
+      - /actuator/**
+      - /fallback/**
+
+# ── Resilience4J circuit breaker configuration
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
+    instances:
+      auth-public-cb:
+        baseConfig: default
+      auth-protected-cb:
+        baseConfig: default
+      society-cb:
+        baseConfig: default
+      complaint-cb:
+        baseConfig: default
+      vendor-cb:
+        baseConfig: default
+      notification-cb:
+        baseConfig: default
+      analytics-cb:
+        baseConfig: default
+      audit-cb:
+        baseConfig: default
+  timelimiter:
+    configs:
+      default:
+        timeoutDuration: 4s
+        cancelRunningFuture: true
+    instances:
+      auth-public-cb:
+        baseConfig: default
+      auth-protected-cb:
+        baseConfig: default
+      society-cb:
+        baseConfig: default
+      complaint-cb:
+        baseConfig: default
+      vendor-cb:
+        baseConfig: default
+      notification-cb:
+        baseConfig: default
+      analytics-cb:
+        baseConfig: default
+      audit-cb:
+        baseConfig: default
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics, circuitbreakers
+  health:
+    circuitbreakers:
+      enabled: true
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    com.smartsociety.gateway: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level [GATEWAY] %logger{36} - %msg%n"

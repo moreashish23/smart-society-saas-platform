@@ -1,0 +1,369 @@
+version: '3.9'
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Smart Society SaaS Platform — Docker Compose (Local Dev)
+# ─────────────────────────────────────────────────────────────────────────────
+# Usage:
+#   docker-compose up -d              # start all services
+#   docker-compose up -d api-gateway auth-service  # start specific services
+#   docker-compose logs -f auth-service            # follow logs
+#   docker-compose down -v            # stop and remove volumes
+# ─────────────────────────────────────────────────────────────────────────────
+
+networks:
+  smart-society-network:
+    driver: bridge
+
+volumes:
+  postgres_auth_data:
+  postgres_society_data:
+  postgres_user_data:
+  postgres_complaint_data:
+  postgres_vendor_data:
+  postgres_notification_data:
+  postgres_analytics_data:
+  postgres_audit_data:
+
+# ─── Shared environment variables ─────────────────────────────────────────────
+x-jwt-env: &jwt-env
+  JWT_SECRET: "ThisIsAVeryLongAndSecureSecretKeyForSmartSocietyPlatformThatMustBeAtLeast512BitsLong!!"
+
+x-mail-env: &mail-env
+  MAIL_HOST: mailhog
+  MAIL_PORT: 1025
+  MAIL_USERNAME: noreply@smartsociety.com
+  MAIL_PASSWORD: ""
+
+x-audit-env: &audit-env
+  AUDIT_SERVICE_URL: http://audit-service:8088
+
+services:
+
+  # ─── API GATEWAY (port 8080) ────────────────────────────────────────────────
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: smart-society-api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      <<: *jwt-env
+      AUTH_SERVICE_HOST: auth-service
+      AUTH_SERVICE_PORT: 8081
+      SOCIETY_SERVICE_HOST: society-service
+      SOCIETY_SERVICE_PORT: 8082
+      USER_SERVICE_HOST: user-service
+      USER_SERVICE_PORT: 8083
+      COMPLAINT_SERVICE_HOST: complaint-service
+      COMPLAINT_SERVICE_PORT: 8084
+      VENDOR_SERVICE_HOST: vendor-service
+      VENDOR_SERVICE_PORT: 8085
+      NOTIFICATION_SERVICE_HOST: notification-service
+      NOTIFICATION_SERVICE_PORT: 8086
+      ANALYTICS_SERVICE_HOST: analytics-service
+      ANALYTICS_SERVICE_PORT: 8087
+      AUDIT_SERVICE_HOST: audit-service
+      AUDIT_SERVICE_PORT: 8088
+    networks:
+      - smart-society-network
+    depends_on:
+      auth-service:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ─── AUTH SERVICE (port 8081) ───────────────────────────────────────────────
+  auth-db:
+    image: postgres:16-alpine
+    container_name: smart-society-auth-db
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_pass
+    volumes:
+      - postgres_auth_data:/var/lib/postgresql/data
+    networks:
+      - smart-society-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth_user -d auth_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: smart-society-auth-service
+    ports:
+      - "8081:8081"
+    environment:
+      <<: [*jwt-env, *mail-env, *audit-env]
+      DB_HOST: auth-db
+      DB_PORT: 5432
+      DB_NAME: auth_db
+      DB_USERNAME: auth_user
+      DB_PASSWORD: auth_pass
+      FRONTEND_URL: http://localhost:5173
+    networks:
+      - smart-society-network
+    depends_on:
+      auth-db:
+        condition: service_healthy
+      mailhog:
+        condition: service_started
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ─── SOCIETY SERVICE (port 8082) ────────────────────────────────────────────
+  society-db:
+    image: postgres:16-alpine
+    container_name: smart-society-society-db
+    environment:
+      POSTGRES_DB: society_db
+      POSTGRES_USER: society_user
+      POSTGRES_PASSWORD: society_pass
+    volumes:
+      - postgres_society_data:/var/lib/postgresql/data
+    networks:
+      - smart-society-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U society_user -d society_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  society-service:
+    build:
+      context: ./society-service
+      dockerfile: Dockerfile
+    container_name: smart-society-society-service
+    ports:
+      - "8082:8082"
+    environment:
+      <<: [*jwt-env, *audit-env]
+      DB_HOST: society-db
+      DB_PORT: 5432
+      DB_NAME: society_db
+      DB_USERNAME: society_user
+      DB_PASSWORD: society_pass
+      AUTH_SERVICE_URL: http://auth-service:8081
+    networks:
+      - smart-society-network
+    depends_on:
+      society-db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8082/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ─── COMPLAINT SERVICE (port 8084) ──────────────────────────────────────────
+  complaint-db:
+    image: postgres:16-alpine
+    container_name: smart-society-complaint-db
+    environment:
+      POSTGRES_DB: complaint_db
+      POSTGRES_USER: complaint_user
+      POSTGRES_PASSWORD: complaint_pass
+    volumes:
+      - postgres_complaint_data:/var/lib/postgresql/data
+    networks:
+      - smart-society-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U complaint_user -d complaint_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  complaint-service:
+    build:
+      context: ./complaint-service
+      dockerfile: Dockerfile
+    container_name: smart-society-complaint-service
+    ports:
+      - "8084:8084"
+    environment:
+      <<: [*jwt-env, *audit-env]
+      DB_HOST: complaint-db
+      DB_PORT: 5432
+      DB_NAME: complaint_db
+      DB_USERNAME: complaint_user
+      DB_PASSWORD: complaint_pass
+      VENDOR_SERVICE_URL: http://vendor-service:8085
+      NOTIFICATION_SERVICE_URL: http://notification-service:8086
+    networks:
+      - smart-society-network
+    depends_on:
+      complaint-db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8084/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ─── VENDOR SERVICE (port 8085) ─────────────────────────────────────────────
+  vendor-db:
+    image: postgres:16-alpine
+    container_name: smart-society-vendor-db
+    environment:
+      POSTGRES_DB: vendor_db
+      POSTGRES_USER: vendor_user
+      POSTGRES_PASSWORD: vendor_pass
+    volumes:
+      - postgres_vendor_data:/var/lib/postgresql/data
+    networks:
+      - smart-society-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vendor_user -d vendor_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  vendor-service:
+    build:
+      context: ./vendor-service
+      dockerfile: Dockerfile
+    container_name: smart-society-vendor-service
+    ports:
+      - "8085:8085"
+    environment:
+      <<: [*jwt-env, *audit-env]
+      DB_HOST: vendor-db
+      DB_PORT: 5432
+      DB_NAME: vendor_db
+      DB_USERNAME: vendor_user
+      DB_PASSWORD: vendor_pass
+    networks:
+      - smart-society-network
+    depends_on:
+      vendor-db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8085/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ─── NOTIFICATION SERVICE (port 8086) ───────────────────────────────────────
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    container_name: smart-society-notification-service
+    ports:
+      - "8086:8086"
+    environment:
+      <<: *jwt-env
+    networks:
+      - smart-society-network
+    restart: unless-stopped
+
+  # ─── ANALYTICS SERVICE (port 8087) ──────────────────────────────────────────
+  analytics-db:
+    image: postgres:16-alpine
+    container_name: smart-society-analytics-db
+    environment:
+      POSTGRES_DB: analytics_db
+      POSTGRES_USER: analytics_user
+      POSTGRES_PASSWORD: analytics_pass
+    volumes:
+      - postgres_analytics_data:/var/lib/postgresql/data
+    networks:
+      - smart-society-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U analytics_user -d analytics_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  analytics-service:
+    build:
+      context: ./analytics-service
+      dockerfile: Dockerfile
+    container_name: smart-society-analytics-service
+    ports:
+      - "8087:8087"
+    environment:
+      <<: *jwt-env
+      DB_HOST: analytics-db
+      DB_PORT: 5432
+      DB_NAME: analytics_db
+      DB_USERNAME: analytics_user
+      DB_PASSWORD: analytics_pass
+      COMPLAINT_SERVICE_URL: http://complaint-service:8084
+      VENDOR_SERVICE_URL: http://vendor-service:8085
+    networks:
+      - smart-society-network
+    depends_on:
+      analytics-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ─── AUDIT SERVICE (port 8088) ──────────────────────────────────────────────
+  audit-db:
+    image: postgres:16-alpine
+    container_name: smart-society-audit-db
+    environment:
+      POSTGRES_DB: audit_db
+      POSTGRES_USER: audit_user
+      POSTGRES_PASSWORD: audit_pass
+    volumes:
+      - postgres_audit_data:/var/lib/postgresql/data
+    networks:
+      - smart-society-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U audit_user -d audit_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  audit-service:
+    build:
+      context: ./audit-service
+      dockerfile: Dockerfile
+    container_name: smart-society-audit-service
+    ports:
+      - "8088:8088"
+    environment:
+      <<: *jwt-env
+      DB_HOST: audit-db
+      DB_PORT: 5432
+      DB_NAME: audit_db
+      DB_USERNAME: audit_user
+      DB_PASSWORD: audit_pass
+    networks:
+      - smart-society-network
+    depends_on:
+      audit-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ─── MAILHOG (local email testing UI at localhost:8025) ─────────────────────
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: smart-society-mailhog
+    ports:
+      - "8025:8025"   # Web UI
+      - "1025:1025"   # SMTP
+    networks:
+      - smart-society-network
