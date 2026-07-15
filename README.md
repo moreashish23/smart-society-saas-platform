@@ -89,13 +89,85 @@ ResidentVerify-->Reopen
 Reopen-->AssignVendor
 ```
 
-##  Screenshots
+##  Application Screenshots
 
-Create `docs/screenshots/` and add: 1. Login 2. Manager Dashboard 3.
-Complaint List 4. Complaint Details 5. Assign Vendor 6. Vendor Dashboard
-7. Vendor Job Details 8. Resident Dashboard 9. Complaint Timeline 10.
-Analytics Dashboard 11. Audit Logs 12. Notifications 13. Complaint
-Verification 14. Complaint Reopened
+###  Authentication
+
+| Login | Register |
+|--------|----------|
+| ![](./screenshots/login.png) | ![](./screenshots/register.png) |
+
+---
+
+###  Society Manager Dashboard
+
+![](./screenshots/manager.png)
+
+**Features**
+- Manage complaints
+- Assign vendors
+- Mark complaints as resolved
+- View analytics
+- Audit logs
+- Notifications
+
+---
+
+###  Resident Portal
+
+![](./screenshots/resident.png)
+
+**Features**
+- Register complaints
+- Track complaint status
+- Verify completed work
+- Reopen complaints if issue persists
+
+---
+
+###  Vendor Dashboard
+
+![](./screenshots/vendor.png)
+
+**Features**
+- View assigned complaints
+- Accept work
+- Start repair
+- Complete work
+
+---
+
+###  Complaint Details
+
+![](./screenshots/complaint.png)
+
+Shows the complete complaint lifecycle with timeline and current status.
+
+---
+
+###  Vendor Complaint Workflow
+
+![](./screenshots/vendor-complaint.png)
+
+Vendor can:
+
+- Accept Complaint
+- Start Work
+- Complete Work
+
+---
+
+###  Complaint Reopened Flow
+
+![](./screenshots/reopen.png)
+
+Demonstrates the complete reopened complaint workflow:
+
+- Resident rejects resolution
+- Complaint reopens automatically
+- Manager reassigns vendor
+- Vendor completes work again
+- Resident verifies successfully
 
 ##  Structure
 
