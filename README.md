@@ -448,9 +448,9 @@ every screen show meaningful data rather than an empty state.
 
 ---
 
-## 👤 Author
+##  Author
 
-**[Ashish More]**
+**Ashish More**
 
 - GitHub: [moreashish23](https://github.com/moreashish23)
 - LinkedIn: [Ashish More](https://www.linkedin.com/in/ashish-more-0651932a6/)
