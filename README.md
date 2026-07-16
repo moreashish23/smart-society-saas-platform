@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🏢 Smart Society SaaS Platform
+#  Smart Society SaaS Platform
 
 **A multi-tenant, microservices-based society & complaint management platform**
 built with Spring Boot, Spring Cloud, React, and PostgreSQL.
@@ -18,7 +18,7 @@ built with Spring Boot, Spring Cloud, React, and PostgreSQL.
 
 ---
 
-## 📖 About The Project
+##  About The Project
 
 **Smart Society** is a multi-tenant SaaS platform for managing residential societies/apartment
 complexes — built around a real, common pain point: complaints raised by residents (a leaking
@@ -37,29 +37,29 @@ not just a CRUD demo.
 
 ---
 
-## ✨ Features
+##  Features
 
-- 🔐 **JWT Authentication** — access + refresh token flow, password reset, change password
-- 👥 **Role-Based Access Control** — `SUPER_ADMIN`, `SOCIETY_MANAGER`, `COMMITTEE_MEMBER`, `RESIDENT`, `MAINTENANCE_STAFF`, `VENDOR`
-- 🚪 **API Gateway** — Spring Cloud Gateway with JWT validation, request routing, and circuit breakers
-- 🔗 **Spring Cloud OpenFeign** — typed, declarative inter-service communication
-- 📋 **Complaint Management** — full lifecycle: create → assign → accept → start → complete → resolve → verify → reopen
-- 🛠️ **Vendor Management** — vendor onboarding/approval, job assignment, ratings, performance tracking
-- 🏘️ **Society Management** — multi-society support, members, notices
-- 🙋 **Resident Management** — society membership, flat/unit assignment
-- 🕒 **Complaint Timeline** — full audit trail of every status change on a complaint
-- 📜 **Audit Logging** — append-only log of key actions across services
-- 📊 **Analytics Dashboard** — complaint trends, vendor performance, resolution metrics
-- 🔔 **Real-Time Notifications** — WebSocket/STOMP over SockJS, personal + society-wide broadcasts
-- 🐘 **PostgreSQL** — database-per-service
-- 🔄 **Flyway Migrations** — versioned schema management per service
-- ⚛️ **React + Vite Frontend** — TypeScript, Redux Toolkit, TanStack Query
-- 📱 **Responsive UI** — Tailwind CSS
-- 🌐 **REST APIs** — documented per-service with OpenAPI/Swagger
+-  **JWT Authentication** — access + refresh token flow, password reset, change password
+-  **Role-Based Access Control** — `SUPER_ADMIN`, `SOCIETY_MANAGER`, `COMMITTEE_MEMBER`, `RESIDENT`, `MAINTENANCE_STAFF`, `VENDOR`
+-  **API Gateway** — Spring Cloud Gateway with JWT validation, request routing, and circuit breakers
+-  **Spring Cloud OpenFeign** — typed, declarative inter-service communication
+-  **Complaint Management** — full lifecycle: create → assign → accept → start → complete → resolve → verify → reopen
+-  **Vendor Management** — vendor onboarding/approval, job assignment, ratings, performance tracking
+-  **Society Management** — multi-society support, members, notices
+-  **Resident Management** — society membership, flat/unit assignment
+-  **Complaint Timeline** — full audit trail of every status change on a complaint
+-  **Audit Logging** — append-only log of key actions across services
+-  **Analytics Dashboard** — complaint trends, vendor performance, resolution metrics
+-  **Real-Time Notifications** — WebSocket/STOMP over SockJS, personal + society-wide broadcasts
+-  **PostgreSQL** — database-per-service
+-  **Flyway Migrations** — versioned schema management per service
+-  **React + Vite Frontend** — TypeScript, Redux Toolkit, TanStack Query
+-  **Responsive UI** — Tailwind CSS
+-  **REST APIs** — documented per-service with OpenAPI/Swagger
 
 ---
 
-## 🧰 Tech Stack
+##  Tech Stack
 
 | Category | Technologies |
 |---|---|
@@ -75,7 +75,7 @@ not just a CRUD demo.
 
 ---
 
-## 🏗️ System Architecture
+##  System Architecture
 
 The platform is composed of a React SPA talking to a single API Gateway, which routes to eight
 independent Spring Boot services — each owning its own PostgreSQL database. Services never talk
@@ -85,19 +85,19 @@ OpenFeign** clients.
 ```mermaid
 flowchart TB
     subgraph Client
-        FE["⚛️ React Frontend<br/>(Vite · TypeScript)"]
+        FE[" React Frontend<br/>(Vite · TypeScript)"]
     end
 
-    FE -->|REST + WebSocket| GW["🚪 API Gateway<br/>Spring Cloud Gateway · JWT filter · Circuit Breakers"]
+    FE -->|REST + WebSocket| GW[" API Gateway<br/>Spring Cloud Gateway · JWT filter · Circuit Breakers"]
 
     subgraph Services["Microservices"]
-        AUTH["🔐 Auth Service"]
-        SOC["🏘️ Society Service"]
-        COMP["📋 Complaint Service"]
-        VEND["🛠️ Vendor Service"]
-        NOTIF["🔔 Notification Service<br/>(WebSocket/STOMP)"]
-        ANALYTICS["📊 Analytics Service"]
-        AUDIT["📜 Audit Service"]
+        AUTH[" Auth Service"]
+        SOC[" Society Service"]
+        COMP[" Complaint Service"]
+        VEND[" Vendor Service"]
+        NOTIF[" Notification Service<br/>(WebSocket/STOMP)"]
+        ANALYTICS[" Analytics Service"]
+        AUDIT[" Audit Service"]
     end
 
     GW --> AUTH
@@ -138,19 +138,19 @@ succeeding).
 
 ---
 
-## 🔁 Complaint Workflow
+##  Complaint Workflow
 
 ```mermaid
 flowchart TD
-    A["🙋 Resident creates complaint"] --> B["👔 Society Manager reviews"]
-    B --> C["🛠️ Manager assigns to Vendor / Staff"]
-    C --> D["✅ Vendor accepts job"]
-    D --> E["🔧 Vendor starts work"]
-    E --> F["🏁 Vendor completes work"]
-    F --> G["👔 Manager reviews & marks resolved"]
-    G --> H{"🙋 Resident verifies?"}
-    H -->|Confirmed fixed| I["🔒 Complaint Closed"]
-    H -->|Not actually fixed| J["🔁 Complaint Reopened"]
+    A[" Resident creates complaint"] --> B[" Society Manager reviews"]
+    B --> C[" Manager assigns to Vendor / Staff"]
+    C --> D[" Vendor accepts job"]
+    D --> E[" Vendor starts work"]
+    E --> F[" Vendor completes work"]
+    F --> G[" Manager reviews & marks resolved"]
+    G --> H{" Resident verifies?"}
+    H -->|Confirmed fixed| I[" Complaint Closed"]
+    H -->|Not actually fixed| J[" Complaint Reopened"]
     J --> C
 
     style A fill:#e0f2fe,stroke:#0369a1
@@ -165,11 +165,78 @@ is notified again once it's marked resolved and awaiting their verification.
 
 ---
 
-## 📸 Screenshots
 
-> Actual screenshots aren't included yet — capture these from a running instance and drop them
-> into a `docs/screenshots/` folder, then reference them below with
-> `![Title](docs/screenshots/filename.png)`. Here's exactly what to capture and why:
+##  Application Screenshots
+
+###  Authentication
+
+| Login | Register |
+|--------|----------|
+| ![](./screenshots/login.png) | ![](./screenshots/register.png) |
+
+---
+
+###  Society Manager Dashboard
+
+![](./screenshots/manager.png)
+
+**Features**
+- Manage complaints
+- Assign vendors
+- Mark complaints as resolved
+- View analytics
+- Audit logs
+- Notifications
+
+---
+
+###  Resident Portal
+
+![](./screenshots/resident.png)
+
+**Features**
+- Register complaints
+- Track complaint status
+- Verify completed work
+- Reopen complaints if issue persists
+
+---
+
+###  Vendor Dashboard
+
+![](./screenshots/vendor.png)
+
+**Features**
+- View assigned complaints
+- Accept work
+- Start repair
+- Complete work
+
+---
+
+###  Complaint Details
+
+![](./screenshots/complaint.png)
+
+Shows the complete complaint lifecycle with timeline and current status.
+
+---
+
+###  Vendor Complaint Workflow
+
+![](./screenshots/vendor-complaint.png)
+
+Vendor can:
+
+- Accept Complaint
+- Start Work
+- Complete Work
+
+---
+
+###  Complaint Reopened Flow
+
+![](./screenshots/reopen.png)
 
 | # | Screenshot | Page | Login as | What should be visible | Why it matters |
 |---|---|---|---|---|---|
@@ -194,7 +261,7 @@ reviewer than static screenshots.
 
 ---
 
-## 📂 Folder Structure
+##  Folder Structure
 
 ```
 smart-society-saas-platform/
@@ -234,7 +301,7 @@ client/ (Feign) · config/ · exception/`, with Flyway migrations in
 
 ---
 
-## 🚀 Installation
+##  Installation
 
 ### Prerequisites
 - Java 21 (JDK)
@@ -283,7 +350,7 @@ service in development (see `vite.config.ts`).
 
 ---
 
-## 🔑 Environment Variables
+##  Environment Variables
 
 None of the values below are real secrets — replace every placeholder before running.
 
@@ -316,7 +383,7 @@ VITE_API_URL=/api
 
 ---
 
-## 🌐 API Services
+##  API Services
 
 | Service | Port | Purpose |
 |---|---|---|
@@ -335,7 +402,7 @@ exploration.
 
 ---
 
-## 🧪 Testing
+##  Testing
 
 Testing was done across several layers rather than a single automated suite:
 
@@ -364,36 +431,36 @@ every screen show meaningful data rather than an empty state.
 
 ---
 
-## 🔮 Future Improvements
+##  Future Improvements
 
-- 🐳 **Docker** — containerize each service + frontend with a `docker-compose` for one-command local spin-up
-- ☸️ **Kubernetes** — Helm charts for orchestrated deployment
-- ☁️ **AWS Deployment** — ECS/EKS + RDS for a real hosted environment
-- 📧 **Email Notifications** — complement in-app/WebSocket notifications with email
-- 📱 **SMS Notifications** — critical alerts (security, emergencies) via SMS
-- 📲 **Mobile Application** — React Native or Flutter companion app
-- 🤖 **AI Complaint Prioritization** — ML-based triage of incoming complaints by urgency/category
-- 📈 **Monitoring** — Prometheus + Grafana for metrics, centralized logging (ELK)
-- ⚙️ **CI/CD** — GitHub Actions pipeline for build, test, and deploy on every push
-- 🗃️ **Service Discovery** — Eureka/Consul to replace static service URLs
-- ⚡ **Caching Layer** — Redis for hot-path reads (dashboards, vendor lists)
-- 📨 **Event-Driven Messaging** — Kafka for async inter-service events, decoupling notification/audit writes from the request path
+-  **Docker** — containerize each service + frontend with a `docker-compose` for one-command local spin-up
+-  **Kubernetes** — Helm charts for orchestrated deployment
+-  **AWS Deployment** — ECS/EKS + RDS for a real hosted environment
+-  **Email Notifications** — complement in-app/WebSocket notifications with email
+-  **SMS Notifications** — critical alerts (security, emergencies) via SMS
+-  **Mobile Application** — React Native or Flutter companion app
+-  **AI Complaint Prioritization** — ML-based triage of incoming complaints by urgency/category
+-  **Monitoring** — Prometheus + Grafana for metrics, centralized logging (ELK)
+-  **CI/CD** — GitHub Actions pipeline for build, test, and deploy on every push
+-  **Service Discovery** — Eureka/Consul to replace static service URLs
+-  **Caching Layer** — Redis for hot-path reads (dashboards, vendor lists)
+-  **Event-Driven Messaging** — Kafka for async inter-service events, decoupling notification/audit writes from the request path
 
 ---
 
 ## 👤 Author
 
-**[Your Name]**
+**[Ashish More]**
 
-- GitHub: [@your-username](https://github.com/your-username)
-- LinkedIn: [your-name](https://linkedin.com/in/your-name)
-- Email: your.email@example.com
-- Portfolio: [your-portfolio.com](https://your-portfolio.com)
+- GitHub: [moreashish23](https://github.com/moreashish23)
+- LinkedIn: [Ashish More](https://www.linkedin.com/in/ashish-more-0651932a6/)
+- Email: moreashishshivaji23@gmail.com
+- Portfolio: [ashish-portfolio.com](https://ashish-more-portfolio.vercel.app)
 
 ---
 
 <div align="center">
 
-⭐ If you found this project interesting, consider giving it a star!
+ If you found this project interesting, consider giving it a star!
 
 </div>
